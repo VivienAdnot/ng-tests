@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
       return new Promise<number[]>((resolve) => {
           setTimeout(() => {
               resolve(this.data);
-          }, 5000);
+          }, 3000);
       });
   }
 }
