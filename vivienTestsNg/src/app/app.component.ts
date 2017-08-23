@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {Observable} from 'rxjs/Rx';
 
 @Component({
   selector: 'app-root',
@@ -8,25 +9,28 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
   title = 'app works!';
   chartDataset = [];
-  data = [320, 332, 301, 334, 390, 330, 320];
+  data = [
+    [320, 332, 301, 334, 390, 330, 320],
+    [12, 156, 236, 292, 318, 369, 444],
+    [40, 51, 260, 281, 346, 439, 455],
+    [31, 141, 275, 292, 322, 361, 414],
+    [18, 178, 234, 250, 392, 402, 456]
+  ];
 
   ngOnInit() {
-    this.getChartData().then((asyncdata) => {
-        console.log("AppComponent ngOnInit ok");
-        this.chartDataset = asyncdata;
-    });
+      this.getData()
+        .map(interval => this.getRandomNumber())
+        .map((index: number) => this.data[index])
+        .subscribe((chartData: number[]) => {
+            this.chartDataset = chartData;
+        });
   }
 
-  async getChartData(): Promise<number[]> {
-    const chartData = await this.getChartDataAsync();
-    return chartData;
+  getRandomNumber(max = 4): number {
+      return Math.round(Math.random()*max);
   }
 
-  getChartDataAsync(): Promise<number[]> {
-      return new Promise<number[]>((resolve) => {
-          setTimeout(() => {
-              resolve(this.data);
-          }, 3000);
-      });
+  getData(): Observable<number> {
+      return Observable.interval(1500).take(15);
   }
 }
