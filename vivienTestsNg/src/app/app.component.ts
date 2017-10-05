@@ -1,36 +1,88 @@
 import { Component, OnInit } from '@angular/core';
-import {Observable} from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'app works!';
-  chartDataset = [];
-  data = [
-    [320, 332, 301, 334, 390, 330, 320],
-    [12, 156, 236, 292, 318, 369, 444],
-    [40, 51, 260, 281, 346, 439, 455],
-    [31, 141, 275, 292, 322, 361, 414],
-    [18, 178, 234, 250, 392, 402, 456]
-  ];
+    title = 'app works!';
 
-  ngOnInit() {
-      this.getData()
-        .map(interval => this.getRandomNumber())
-        .map((index: number) => this.data[index])
-        .subscribe((chartData: number[]) => {
-            this.chartDataset = chartData;
+    private filterLimits = [10, 20, 30, 40, 50];
+
+    currentLimit = 0;
+
+    rows = [];
+
+    async ngOnInit() {
+        this.currentLimit = this.filterLimits.shift();
+        
+        this.log("ngOnInit before init");
+        
+        await this.init();
+
+        this.log("ngOnInit after init");
+
+        Observable.fromEvent(window, 'scroll')
+            .filter(() => this.filterLimits.length > 0)
+            .filter(() => this.getCurrentScrollHeight() >= this.getTotalWindowHeight())
+            .throttleTime(4000)
+            .subscribe(async (event) => {
+                this.log("scroll start");
+                await this.onScrollBottom();
+                this.log("scroll end");
+            });
+    }
+
+    log(title: string) {
+        console.table({
+            title: title,
+            scrollHeight: this.getCurrentScrollHeight(),
+            totalHeight: this.getTotalWindowHeight(),
+            rows: this.rows.length
         });
-  }
+    }
 
-  getRandomNumber(max = 4): number {
-      return Math.round(Math.random()*max);
-  }
+    ngAfterViewInit() {
+        this.log("ngAfterViewInit");
+    }
 
-  getData(): Observable<number> {
-      return Observable.interval(1500).take(15);
-  }
+    private getCurrentScrollHeight() {
+        return Math.round(document.documentElement.scrollTop + window.innerHeight) + 1;
+    }
+
+    private getTotalWindowHeight() {
+        return document.body.scrollHeight;
+    }
+
+    async onScrollBottom() {
+        let newLimit = this.filterLimits.shift();
+        if (newLimit) {
+            this.currentLimit = newLimit;
+            await this.init();
+        }
+    }
+
+    async init() {
+        await this.refresh();
+    }
+
+    async refresh() {
+        this.rows = await this.getCompaniesScoringTyped(this.currentLimit);
+    }
+
+    getCompaniesScoringTyped(limit: number) {
+        let rows = [];
+
+        for(let i = 0; i < limit; i++) {
+            rows.push(i);
+        }
+
+        return new Promise<any[]>((resolve, reject) => {
+            setTimeout(() => {
+                resolve(rows);
+            }, 2000);
+        })
+    }
 }

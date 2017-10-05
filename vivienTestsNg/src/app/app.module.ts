@@ -6,12 +6,12 @@ import { HttpModule } from '@angular/http';
 import { AngularEchartsModule } from 'ngx-echarts';
 
 import { AppComponent } from './app.component';
-import { BarChartComponent } from './bar-chart/bar-chart.component';
+import { ContentComponent } from './content/content.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BarChartComponent
+    ContentComponent
   ],
   imports: [
     BrowserModule,
